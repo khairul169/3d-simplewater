@@ -1,0 +1,6 @@
+[gd_resource type="MaterialShader" format=1]
+
+[resource]
+
+_code = { "fragment":"uniform texture reflectionTex;\nuniform texture refractionTex;\nuniform texture dudvMap;\nuniform float waterTiling;\nuniform color waterTint;\nuniform float waterDistortion;\nuniform float refractiveFactor;\n\nvec2 uv = (VAR1.xy/VAR1.w)/2.0+vec2(0.5, 0.5);\nvec2 distortion = (tex(dudvMap, UV * waterTiling +vec2(0.1*TIME, 0)).rg * 2.0 - vec2(1.0, 1.0)) * waterDistortion;\nuv += distortion;\n\nvec3 mixedTex = mix(tex(reflectionTex, vec2(uv.x, uv.y)).rgb, tex(refractionTex, vec2(uv.x, uv.y)).rgb, refractiveFactor);\nmixedTex = mix(mixedTex, waterTint.rgb, waterTint.a);\nDIFFUSE = mixedTex;\n", "fragment_ofs":0, "light":"", "light_ofs":0, "vertex":"VAR1 = PROJECTION_MATRIX*MODELVIEW_MATRIX*vec4(SRC_VERTEX.x, SRC_VERTEX.y, SRC_VERTEX.z, 1.0);\n", "vertex_ofs":0 }
+
