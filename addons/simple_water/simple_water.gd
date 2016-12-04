@@ -71,13 +71,13 @@ func _ready():
 	
 	# Adding level instance
 	if (environmentNode != null && typeof(environmentNode) == TYPE_NODE_PATH):
-		environmentNode = get_node(environmentNode);
+		var envNode = get_node(environmentNode);
 		
-		environmentNode = environmentNode.duplicate();
-		reflection.add_child(environmentNode);
+		envNode = envNode.duplicate();
+		reflection.add_child(envNode);
 		
-		environmentNode = environmentNode.duplicate();
-		refraction.add_child(environmentNode);
+		envNode = envNode.duplicate();
+		refraction.add_child(envNode);
 	
 	set_fixed_process(true);
 
