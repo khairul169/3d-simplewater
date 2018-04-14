@@ -1,0 +1,71 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=2]
+
+[ext_resource path="res://addons/simple_water/textures/waterDUDV.png" type="Texture" id=1]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type spatial;
+render_mode unshaded;
+
+uniform sampler2D reflectionTex: hint_albedo;
+uniform sampler2D dudvMap;
+uniform vec4 waterTint: hint_color;
+uniform float fogDensity;
+uniform float waterTiling;
+uniform float waterDistortion;
+uniform float refractiveFactor;
+
+void vertex() {
+	UV = (WORLD_MATRIX * vec4(VERTEX, 0.0)).xz;
+}
+
+void fragment() {
+	float surf_dist = FRAGCOORD.z / FRAGCOORD.w;
+	vec2 uv = SCREEN_UV;
+	
+	float depth = texture(DEPTH_TEXTURE, SCREEN_UV).r;
+	vec4 upos = (INV_PROJECTION_MATRIX * vec4(SCREEN_UV*2.0-1.0, depth*2.0-1.0,1.0));
+	
+	float fog_factor = clamp(-(upos.z/upos.w+surf_dist)*fogDensity, 0.0, 1.0);
+	
+	vec2 distortion = (texture(dudvMap, UV * waterTiling + vec2(0.1*TIME, 0.0)).rg * 2.0 - vec2(1.0)) * waterDistortion;
+	distortion += (texture(dudvMap, UV * waterTiling + vec2(283,304) + vec2(-0.1*TIME, 0.1*TIME)).rg * 2.0 - vec2(1.0)) * waterDistortion;
+	distortion /= surf_dist/10.0;
+	uv += distortion;
+	
+	//add fog and refraction
+	vec3 mixedTex = mix(texture(SCREEN_TEXTURE, uv).rgb, waterTint.rgb, fog_factor);
+	
+	//calculate fresnel
+	float eyeAngledot = dot(normalize(-VERTEX), normalize(NORMAL));
+	float fresnel = pow(1.0-eyeAngledot, refractiveFactor);
+	
+	//add reflection
+	vec4 reflection = texture(reflectionTex, uv);
+	mixedTex = mix(mixedTex, reflection.rgb, clamp(fresnel, 0.0, 1.0));
+	
+	//distortion *= 10.0;
+	//NORMAL = (INV_CAMERA_MATRIX * normalize(vec4(distortion.x, 1.0, distortion.y, 0.0))).rgb;
+	
+	ALBEDO = mixedTex;
+}"
+
+[sub_resource type="ViewportTexture" id=2]
+
+resource_local_to_scene = true
+flags = 4
+viewport_path = NodePath("")
+
+[resource]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/waterTint = Color( 0.4, 0.5, 0.6, 0.2 )
+shader_param/fogDensity = 0.0
+shader_param/waterTiling = 0.3
+shader_param/waterDistortion = 0.01
+shader_param/refractiveFactor = 2.0
+shader_param/reflectionTex = SubResource( 2 )
+shader_param/dudvMap = ExtResource( 1 )
+_sections_unfolded = [ "shader_param" ]
+
