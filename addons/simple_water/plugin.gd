@@ -5,7 +5,8 @@ const Water = preload("simple_water.gd");
 const WaterType = "Water";
 
 func _enter_tree():
-	add_custom_type(WaterType, "Quad", Water, preload("icon.png"));
+	print('hi_there')
+	add_custom_type(WaterType, "MeshInstance", Water, preload("icon.png"));
 
 func _exit_tree():
 	remove_custom_type(WaterType);
